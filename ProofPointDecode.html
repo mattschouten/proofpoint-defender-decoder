@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>ProofPoint URLDefense URL Decoder</title>
+</head>
+<body>
+<h1>ProofPoint URLDefense URL Decoder</h1>
+<p>Paste your full URL (https://urldefense.proofpoint.com/...) below.  No guarantees.  And if you're smart enough to use this, you should be smart enough to not get phished or malware-d.<p>
+<form name="decoder_form">
+		<textarea name="encoded" id="encoded" rows="5" cols="60" placeholder="Paste defended URL here" autofocus="true" oninput="decode_url()"></textarea>
+		<br />
+		<button name="decode" onclick="decode_url()" type="button">Decode</button>
+</form>
+<p id="decoded" style="border: 2px solid red"></p>
+
+<script type="text/javascript">
+function decode_url() {
+		var source = document.getElementById('encoded');
+		var dest = document.getElementById('decoded');
+		
+		if (!source) {
+				alert("Cannot find source textarea with id 'encoded'.");
+				return false;
+		}
+		if (!dest) {
+				alert("Cannot find target <p> with id 'decoded'.");
+				return false;
+		};
+
+		// Assumptions:
+		// 1.  Defended URL is in the "u=" parameter of the full URL
+		// 2.  Any parameters after u= can be stripped.
+
+
+		var full_url = encoded.value;
+
+		var find_re = /.+?u=(.+?)(&.*)?$/;
+		var matches = find_re.exec(full_url);
+		if (matches) {
+				var defended = matches[1];
+				var with_slashes = defended.replace(/_/g, '/');  // Regex with g flag to get all
+				var defenseless = de_hex(with_slashes);
+
+				dest.textContent = defenseless;
+		} else {
+				dest.textContent = full_url;
+		}
+
+		return false;
+}
+
+function de_hex(hexed) {
+	var result = hexed;
+	var hex_re = /(.*)(-)([0-9A-F][0-9A-F])(.*)/;
+	var hexmatches = hex_re.exec(hexed);
+
+	while (hexmatches && hexmatches.index !== null) {
+			var character = String.fromCharCode(parseInt(hexmatches[3], 16));
+			result = hexmatches[1] + character + hexmatches[4];
+
+			hexmatches = hex_re.exec(result);
+	}
+	return result;
+}
+
+</script>
+</body>
+</html>
